@@ -4,24 +4,29 @@ class VideoIterable(object):
   """ Take a filename of a video and yield the current frame on each call to next() """
   def __init__(self, filename):
     self.filename = filename
-    capture = cv2.VideoCapture(filename)
-    read_from(capture)
+    self.capture = cv2.VideoCapture(filename)
+    self.read_next_from_capture()
 
-  def read_from(capture):
-    self.success, self.image = capture.read()
+  def __iter__(self):
+    return self
+
+  def read_next_from_capture(self):
+    self.success, self.image = self.capture.read()
+    return self.success
 
   def next(self):
-    read_from(capture)
-    if (self.success == False):
+    if self.read_next_from_capture() == False:
       raise StopIteration 
     return self.image
 
-capture = cv2.VideoCapture('original.mov')
-success,image = capture.read()
+def main():
+  videofilm = VideoIterable('original.mov')
+  print("read in video")
+  for image in videofilm:
+    cv2.imshow('video', image)
+    if cv2.waitKey(10) == 27:
+      print("hit key 27")
+      break
 
-while success:
-  success,image = capture.read()
-  cv2.imshow('video', image)
-  if cv2.waitKey(10) == 27:
-    break
+main()
 
